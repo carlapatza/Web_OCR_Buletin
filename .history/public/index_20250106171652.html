@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR Web App</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <h1>OCR Web App</h1>
+  <div>
+    <video id="cameraPreview" autoplay playsinline style="width: 100%; max-width: 640px;"></video>
+    <button id="captureBtn" style="display: none;">Capture ID</button>
+    <button id="stopCameraBtn" style="display: none;">Stop Camera</button>
+    <button id="startCameraBtn">Start Camera</button>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    const video = document.getElementById('cameraPreview');
+    const captureBtn = document.getElementById('captureBtn');
+    const stopCameraBtn = document.getElementById('stopCameraBtn');
+    const startCameraBtn = document.getElementById('startCameraBtn');
+    let stream;
+
+    // Initialize camera
+    async function initCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+        captureBtn.style.display = 'block';
+        stopCameraBtn.style.display = 'block';
+        startCameraBtn.style.display = 'none'; // Hide start button
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Camera access denied. Please allow camera access to use this feature.');
+      }
+    }
+
+    // Stop camera
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+        captureBtn.style.display = 'none';
+        stopCameraBtn.style.display = 'none';
+        startCameraBtn.style.display = 'block'; // Show start button
+      }
+    }
+
+    // Capture image and process
+    captureBtn.addEventListener('click', async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Process image with Tesseract.js
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = 'Processing ID...';
+
+      const { data: { text } } = await Tesseract.recognize(
+        canvas.toDataURL('image/jpeg'),
+        'eng',
+        {
+          logger: m => console.log(m)
+        }
+      );
+
+      resultDiv.innerHTML = ''; // Clear previous results
+      const lines = text.split('\n'); // Split text into lines
+      const ul = document.createElement('ul'); // Create a list element
+
+      // Regex patterns to find name and first name
+      const namePattern = /Name:\s*(.*)/i; // Matches "Name: [name]"
+      const firstNamePattern = /Vorname:\s*(.*)/i; // Matches "Vorname: [first name]"
+
+      const nameField = lines.find(line => namePattern.test(line))?.match(namePattern)?.[1] || 'Name not found';
+      const firstNameField = lines.find(line => firstNamePattern.test(line))?.match(firstNamePattern)?.[1] || 'First name not found';
+      const dobField = lines.find(line => line.includes('Geburtsdatum:')) || 'Date of birth not found';
+      const addressField = lines.find(line => line.includes('Adresse:')) || 'Address not found';
+
+      // Create a table to display the results
+      const table = document.createElement('table');
+      const headerRow = table.insertRow();
+      headerRow.insertCell().textContent = 'Name of Birth';
+      headerRow.insertCell().textContent = 'Given Names';
+      headerRow.insertCell().textContent = 'Date of Birth';
+      headerRow.insertCell().textContent = 'Address';
+
+      const dataRow = table.insertRow();
+      dataRow.insertCell().textContent = nameField;
+      dataRow.insertCell().textContent = firstNameField;
+      dataRow.insertCell().textContent = dobField;
+      dataRow.insertCell().textContent = addressField;
+
+      resultDiv.appendChild(table); // Append the table to the result div
+    });
+
+    // Start camera button event
+    startCameraBtn.addEventListener('click', initCamera);
+    
+    // Stop camera button event
+    stopCameraBtn.addEventListener('click', stopCamera);
+
+    // Initialize camera on page load
+    window.addEventListener('load', initCamera);
+
+    // Clean up camera stream
+    window.addEventListener('beforeunload', stopCamera);
+  </script>
+</body>
+</html>

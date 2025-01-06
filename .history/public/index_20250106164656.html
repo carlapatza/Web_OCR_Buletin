@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR Web App</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <h1>OCR Web App</h1>
+  <div>
+    <video id="cameraPreview" autoplay playsinline style="width: 100%; max-width: 640px;"></video>
+    <button id="captureBtn" style="display: none;">Capture ID</button>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    const video = document.getElementById('cameraPreview');
+    const captureBtn = document.getElementById('captureBtn');
+    let stream;
+
+    // Initialize camera
+    async function initCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+        captureBtn.style.display = 'block';
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Camera access denied. Please allow camera access to use this feature.');
+      }
+    }
+
+    // Capture image and process
+    captureBtn.addEventListener('click', async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Process image with Tesseract.js
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = 'Processing ID...';
+
+      const { data: { text } } = await Tesseract.recognize(
+        canvas.toDataURL('image/jpeg'),
+        'eng',
+        {
+          logger: m => console.log(m)
+        }
+      );
+
+      resultDiv.innerHTML = ''; // Clear previous results
+      const lines = text.split('\n'); // Split text into lines
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = ''; // Clear previous results
+      const ul = document.createElement('ul'); // Create a list element
+=======
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = ''; // Clear previous results
+      const ul = document.createElement('ul'); // Create a list element
+      const nameField = lines.find(line => line.includes('Name:')) || 'Name not found';
+      const firstNameField = lines.find(line => line.includes('Vorname:')) || 'First name not found';
+      const dobField = lines.find(line => line.includes('Geburtsdatum:')) || 'Date of birth not found';
+      const idField = lines.find(line => line.includes('ID:')) || 'ID not found';
+      const addressPrompt = 'Please flip the ID card to scan the address.';
+      const addressField = lines.find(line => line.includes('Adresse:')) || 'Address not found';
+      
+      const instructions = document.createElement('p');
+      instructions.textContent = `Position the ID card correctly. ${addressPrompt}`;
+      resultDiv.appendChild(instructions);
+      
+      const fields = [nameField, firstNameField, dobField, idField, addressField];
+      fields.forEach(field => {
+        const li = document.createElement('li'); // Create a list item for each field
+        li.textContent = field; // Set the text content
+        ul.appendChild(li); // Append the list item to the list
+      });
+      const ul = document.createElement('ul'); // Create a list element
+
+      lines.forEach(line => {
+        const li = document.createElement('li'); // Create a list item for each line
+        li.textContent = line; // Set the text content
+        ul.appendChild(li); // Append the list item to the list
+      });
+
+      resultDiv.appendChild(ul); // Append the list to the result div
+    });
+
+    // Initialize camera on page load
+    window.addEventListener('load', initCamera);
+
+    // Clean up camera stream
+    window.addEventListener('beforeunload', () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    });
+  </script>
+</body>
+</html>
