@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Web App</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2"></script>
+    <style>
+        video {
+            width: 100%;
+            max-width: 500px;
+        }
+        #result {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📸 OCR Web App</h1>
+    <div>
+        <video id="cameraPreview" autoplay playsinline></video>
+        <br>
+        <button id="startCameraBtn">Start Camera</button>
+        <button id="captureBtn">Capture Image</button>
+        <button id="stopCameraBtn">Stop Camera</button>
+    </div>
+    <div id="result">Erkannter Text erscheint hier...</div>
+    <script>
+        const video = document.getElementById('cameraPreview');
+        const captureBtn = document.getElementById('captureBtn');
+        const stopCameraBtn = document.getElementById('stopCameraBtn');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const resultDiv = document.getElementById('result');
+        let stream = null;
+
+        // 📹 Kamera starten
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('Error starting camera:', err);
+            }
+        }
+
+        // 🛑 Kamera stoppen
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        // 📸 Bild aufnehmen und OCR ausführen
+        async function captureAndRecognizeText() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // OCR mit Tesseract.js
+            resultDiv.innerText = "📖 Texterkennung läuft...";
+            const dataUrl = canvas.toDataURL('image/png');
+            Tesseract.recognize(dataUrl, 'eng')
+                .then(({ data: { text } }) => {
+                    resultDiv.innerText = `📄 Erkannter Text:\n${text}`;
+                })
+                .catch(err => {
+                    console.error('OCR-Fehler:', err);
+                    resultDiv.innerText = '❌ Fehler bei der Texterkennung';
+                });
+        }
+
+        // 🎯 Event-Listener
+        startCameraBtn.addEventListener('click', startCamera);
+        stopCameraBtn.addEventListener('click', stopCamera);
+        captureBtn.addEventListener('click', captureAndRecognizeText);
+    </script>
+</body>
+</html>

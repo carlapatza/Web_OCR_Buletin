@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ausweis Scanner</title>
+</head>
+<body>
+    <h1>Ausweis Scanner</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="snap">Bild aufnehmen</button>
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <script src="https://cdn.rawgit.com/naptha/tesseract.js/2.1.1/dist/tesseract.min.js"></script>
+
+    <div id="result"></div>
+    <ul id="infoList"></ul>
+
+    <script>
+        // Zugriff auf die Kamera
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snapButton = document.getElementById('snap');
+        const context = canvas.getContext('2d');
+
+        // Kamera streamen
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch((err) => {
+                console.error("Fehler beim Zugriff auf die Kamera: " + err);
+            });
+
+        // Bild aufnehmen
+        snapButton.addEventListener('click', () => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // OCR mit Tesseract.js
+            Tesseract.recognize(
+                canvas.toDataURL(),
+                'deu', // Sprache: Deutsch
+                {
+                    logger: info => console.log(info) // Protokollierung des Fortschritts
+                }
+            ).then(({ data: { text } }) => {
+                // Ergebnisse anzeigen
+                document.getElementById('result').innerText = text;
+            });
+        });
+    </script>
+</body>
+</html>
