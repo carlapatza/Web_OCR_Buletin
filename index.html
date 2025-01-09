@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Scanner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/2.1.1/tesseract.min.js"></script>
+    <style>
+        #video {
+            width: 100%; /* Adjusted to fit the container */
+            max-width: 600px; /* Set a maximum width */
+            height: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>ID Scanner</h1>
+    <video id="video" autoplay></video>
+    <button id="capture">Capture Image</button>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <h2>Extracted Information</h2>
+    <table id="infoTable">
+        <thead>
+            <tr>
+                <th>Numele</th> <!-- Updated header -->
+                <th>Prenumele</th> <!-- Updated header -->
+                <th>Date of Birth</th>
+            </tr>
+        </thead>
+        <tbody id="infoBody">
+        </tbody>
+    </table>
+    <script src="script.js"></script>
+</body>
+</html>
