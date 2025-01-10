@@ -2,19 +2,28 @@ const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const captureButton = document.getElementById('capture');
 const infoBody = document.getElementById('infoBody');
+const startCameraButton = document.getElementById('startCamera');
+const cameraSelect = document.getElementById('cameraSelect');
 
-// Access the camera
-navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { exact: "environment" } }
-})
-.then(stream => {
-    video.srcObject = stream;
-    console.log("Camera stream successfully loaded"); // Debugging log
-})
-.catch(err => {
-    console.error("Error accessing the camera: ", err.name, err.message);
-    alert(`Could not access the camera: ${err.name}. Please check your permissions and ensure your browser is using HTTPS.`);
+startCameraButton.addEventListener('click', () => {
+    const facingMode = cameraSelect.value;
+    startCamera(facingMode);
 });
+
+// Function to start the camera
+function startCamera(facingMode) {
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: facingMode } }
+    })
+    .then(stream => {
+        video.srcObject = stream;
+        console.log("Camera stream successfully loaded"); // Debugging log
+    })
+    .catch(err => {
+        console.error("Error accessing the camera: ", err.name, err.message);
+        alert(`Could not access the camera: ${err.name}. Please check your permissions and ensure your browser is using HTTPS.`);
+    });
+}
 
 // Capture image and process it
 captureButton.addEventListener('click', () => {

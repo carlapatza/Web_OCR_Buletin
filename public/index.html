@@ -26,6 +26,12 @@
 </head>
 <body>
     <h1>ID Scanner</h1>
+    <label for="cameraSelect">Select Camera:</label>
+    <select id="cameraSelect">
+        <option value="user">Front Camera</option>
+        <option value="environment">Back Camera</option>
+    </select>
+    <button id="startCamera">Start Camera</button>
     <video id="video" autoplay></video>
     <button id="capture">Capture Image</button>
     <canvas id="canvas"></canvas>
@@ -38,8 +44,7 @@
                 <th>Date of Birth</th>
             </tr>
         </thead>
-        <tbody id="infoBody">
-        </tbody>
+        <tbody id="infoBody"></tbody>
     </table>
     <script src="script.js"></script>
 </body>
