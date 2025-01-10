@@ -1,44 +1,30 @@
-const video = document.getElementById('video');
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
 const canvas = document.getElementById('canvas');
-const captureButton = document.getElementById('capture');
 const infoBody = document.getElementById('infoBody');
-const startCameraButton = document.getElementById('startCamera');
-const cameraSelect = document.getElementById('cameraSelect');
 
-startCameraButton.addEventListener('click', () => {
-    const facingMode = cameraSelect.value;
-    startCamera(facingMode);
+fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.src = e.target.result;
+            processImage(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
 });
 
-// Function to start the camera
-function startCamera(facingMode) {
-    navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: facingMode } }
-    })
-    .then(stream => {
-        video.srcObject = stream;
-        console.log("Camera stream successfully loaded"); // Debugging log
-    })
-    .catch(err => {
-        console.error("Error accessing the camera: ", err.name, err.message);
-        alert(`Could not access the camera: ${err.name}. Please check your permissions and ensure your browser is using HTTPS.`);
-    });
-}
-
-// Capture image and process it
-captureButton.addEventListener('click', () => {
-    console.log("Capture button clicked"); // Debugging log
-    if (video.srcObject) {
+function processImage(dataUrl) {
+    const img = new Image();
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
         const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0);
-        console.log("Image captured"); // Debugging log
-
-        // Make the canvas visible to show the captured image
+        context.drawImage(img, 0, 0);
         canvas.style.display = 'block';
 
-        // Perform OCR (optional, if you want to extract text)
+        // Perform OCR using Tesseract.js
         Tesseract.recognize(
             canvas,
             'eng',
@@ -52,10 +38,9 @@ captureButton.addEventListener('click', () => {
             console.error("Error during OCR processing: ", err);
             alert("Could not process the image. Please try again.");
         });
-    } else {
-        alert("Video stream is not available. Please check your camera.");
-    }
-});
+    };
+    img.src = dataUrl;
+}
 
 // Extract information using regex
 function extractInfo(text) {
