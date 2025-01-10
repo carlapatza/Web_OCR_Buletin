@@ -10,16 +10,6 @@
             width: 100%; /* Adjusted to fit the container */
             max-width: 600px; /* Set a maximum width */
             height: auto;
-            position: relative;
-        }
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 2px dashed red; /* Overlay frame */
-            pointer-events: none; /* Allow interactions with the video */
         }
         table {
             width: 100%;
@@ -40,10 +30,7 @@
 </head>
 <body>
     <h1>ID Scanner</h1>
-    <div style="position: relative; display: inline-block;">
-        <video id="video" autoplay></video>
-        <div id="overlay"></div>
-    </div>
+    <video id="video" autoplay></video>
     <button id="capture">Capture Image</button>
     <canvas id="canvas"></canvas>
     <h2>Extracted Information</h2>

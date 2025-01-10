@@ -14,24 +14,6 @@ navigator.mediaDevices.getUserMedia({ video: true })
         alert(`Could not access the camera: ${err.name}. Please check your permissions and ensure your browser is using HTTPS.`);
     });
 
-// Funktion zur Verbesserung der Bildqualität
-function enhanceImage(context, canvas) {
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    // Erhöhe den Kontrast
-    const contrast = 40; // Erhöhe den Kontrast um 40%
-    const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-
-    for (let i = 0; i < data.length; i += 4) {
-        data[i] = factor * (data[i] - 128) + 128;     // Rot
-        data[i+1] = factor * (data[i+1] - 128) + 128; // Grün
-        data[i+2] = factor * (data[i+2] - 128) + 128; // Blau
-    }
-
-    context.putImageData(imageData, 0, 0);
-}
-
 // Capture image and process it
 captureButton.addEventListener('click', () => {
     console.log("Capture button clicked"); // Debugging log
@@ -41,9 +23,6 @@ captureButton.addEventListener('click', () => {
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0);
         console.log("Image captured"); // Debugging log
-
-        // Verbesserung der Bildqualität
-        enhanceImage(context, canvas);
 
         // Make the canvas visible
         canvas.style.display = 'block';
