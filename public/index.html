@@ -4,22 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ID Scanner</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/2.1.1/tesseract.min.js"></script>
     <style>
-        #video {
-            width: 100%; /* Adjusted to fit the container */
-            max-width: 600px; /* Set a maximum width */
-            height: auto;
-            position: relative;
-        }
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #video, #canvas {
             width: 100%;
-            height: 100%;
-            border: 2px dashed red; /* Overlay frame */
-            pointer-events: none; /* Allow interactions with the video */
+            max-width: 600px;
+            height: auto;
+        }
+        #canvas {
+            display: none; /* Initially hidden */
         }
         table {
             width: 100%;
@@ -30,28 +22,19 @@
             padding: 8px;
             text-align: left;
         }
-        #canvas {
-            width: 100%; /* Adjust the size to fit the container */
-            max-width: 600px; /* Set a maximum width */
-            height: auto;
-            display: none; /* Initially hidden */
-        }
     </style>
 </head>
 <body>
     <h1>ID Scanner</h1>
-    <div style="position: relative; display: inline-block;">
-        <video id="video" autoplay></video>
-        <div id="overlay"></div>
-    </div>
+    <video id="video" autoplay></video>
     <button id="capture">Capture Image</button>
     <canvas id="canvas"></canvas>
     <h2>Extracted Information</h2>
     <table id="infoTable">
         <thead>
             <tr>
-                <th>Name</th> <!-- Updated header -->
-                <th>Vorname</th> <!-- Updated header -->
+                <th>Name</th>
+                <th>Vorname</th>
                 <th>Date of Birth</th>
             </tr>
         </thead>

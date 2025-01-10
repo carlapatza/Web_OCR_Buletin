@@ -4,35 +4,17 @@ const captureButton = document.getElementById('capture');
 const infoBody = document.getElementById('infoBody');
 
 // Access the camera
-// Access the camera
 navigator.mediaDevices.getUserMedia({
     video: { facingMode: { exact: "environment" } }
 })
-    .then(stream => {
-        video.srcObject = stream;
-        console.log("Camera stream successfully loaded"); // Debugging log
-    })
-    .catch(err => {
-        console.error("Error accessing the camera: ", err.name, err.message);
-        alert(`Could not access the camera: ${err.name}. Please check your permissions and ensure your browser is using HTTPS.`);
-    });
-// Funktion zur Verbesserung der Bildqualität
-function enhanceImage(context, canvas) {
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    // Erhöhe den Kontrast
-    const contrast = 40; // Erhöhe den Kontrast um 40%
-    const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-
-    for (let i = 0; i < data.length; i += 4) {
-        data[i] = factor * (data[i] - 128) + 128;     // Rot
-        data[i+1] = factor * (data[i+1] - 128) + 128; // Grün
-        data[i+2] = factor * (data[i+2] - 128) + 128; // Blau
-    }
-
-    context.putImageData(imageData, 0, 0);
-}
+.then(stream => {
+    video.srcObject = stream;
+    console.log("Camera stream successfully loaded"); // Debugging log
+})
+.catch(err => {
+    console.error("Error accessing the camera: ", err.name, err.message);
+    alert(`Could not access the camera: ${err.name}. Please check your permissions and ensure your browser is using HTTPS.`);
+});
 
 // Capture image and process it
 captureButton.addEventListener('click', () => {
@@ -44,19 +26,12 @@ captureButton.addEventListener('click', () => {
         context.drawImage(video, 0, 0);
         console.log("Image captured"); // Debugging log
 
-        // Verbesserung der Bildqualität
-        enhanceImage(context, canvas);
-
-        // Make the canvas visible
+        // Make the canvas visible to show the captured image
         canvas.style.display = 'block';
 
-        // Convert canvas to data URL and log it
-        const dataURL = canvas.toDataURL();
-        console.log("Canvas Data URL: ", dataURL); // Debugging log
-
-        // Perform OCR
+        // Perform OCR (optional, if you want to extract text)
         Tesseract.recognize(
-            dataURL,
+            canvas,
             'eng',
             {
                 logger: info => console.log(info) // Optional logger
